@@ -1,0 +1,26 @@
+{
+  "name": "backbone-notes",
+  "description": "Add notes to your Backbone Models",
+  "main": "index.js",
+  "authors": [
+    "Edgar Ribeiro"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "backbone",
+    "auth"
+  ],
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "homepage": "https://github.com/Cloudoki/backbone-notes",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "backbone-notes",
+  "version": "1.0.0",
+  "description": "Add notes to your Backbone Models",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cloudoki/backbone-notes.git"
+  },
+  "keywords": [
+    "backbone",
+    "notes"
+  ],
+  "author": "Edgar Ribeiro",
+  "email": "edgar@cloudoki.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Cloudoki/backbone-notes/issues"
+  },
+  "homepage": "https://github.com/Cloudoki/backbone-notes#readme"
+}
