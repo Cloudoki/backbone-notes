@@ -2,17 +2,17 @@
 
 Add notes to your Backbone Models
 
-### Instalation
+## Requirements
 
-Requirements: Backbone
+- [backbonejs](http://backbonejs.org/)
 
-With script Tag `<script type="text/javascript" src="https://github.com/Cloudoki/backbone-notes/blob/master/index.js"></script>`
+## Instalation
 
-With Bower `bower install git://github.com/Cloudoki/backbone-notes.git`
+- **Script Tag:** `<script type="text/javascript" src="https://github.com/Cloudoki/backbone-notes/blob/master/index.js"></script>`
+- **Bower:** `bower install git://github.com/Cloudoki/backbone-notes.git`
+- **npm:** `npm install github:Cloudoki/backbone-notes`
 
-With npm `npm install github:Cloudoki/backbone-notes`
-
-### Usage
+## Usage
 
 ```javascript
 
