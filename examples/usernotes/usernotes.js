@@ -15,6 +15,14 @@
         name: 'John Doe'
     });
 
+    var userNotes = new Notes.CollectionView([], {
+        el: $('#notesContainer'),
+        parentModel: user,
+        url: '/mynotes' // custom URL
+    });
+
+    /*
+    // Notes collection test
     var userNotes = new Notes.Collection([], {
         parentModel: user,
         // url: '/mynotes' // custom URL
@@ -49,5 +57,6 @@
     // DELETE to endpoint /users/1/(notes or custom URL)/2, may show Error 501
 
     // console.log('Notes -', userNotes);
+    */
 
 })(Backbone, Notes);
