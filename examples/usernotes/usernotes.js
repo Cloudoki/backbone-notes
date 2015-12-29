@@ -1,27 +1,68 @@
-(function(Backbone, Notes) {
-    'use strict';
+(function(Backbone, Mustache, Notes) {
+  'use strict';
 
-    console.log('NOTES TEST');
+  console.log('NOTES TEST');
 
-    var User = Backbone.Model.extend({
-        defaults: {
-            name: 'unnamed'
-        },
-        urlRoot: '/users'
-    });
+  // Creating a model to be the notes parent
+  var User = Backbone.Model.extend({
+    defaults: {
+      name: 'unnamed user'
+    },
+    urlRoot: '/users' // the model must have a urlRoot assigned
+  });
+  var user = new User({
+    id: 1,
+    name: 'John Doe'
+  });
 
-    var user = new User({
-        id: 1,
-        name: 'John Doe'
-    });
+  var userNotes = new Notes.CollectionView({
+    el: $('#notes'), // where to add the notes to
+    parentModel: user, // adding the notes parent
+    url: '/mynotes', // URL to get notes from
+    editElement: '#editElement', // the element id/class to get the edited text from
+  });
 
-    var userNotes = new Notes.CollectionView([], {
-        el: $('#notesContainer'),
-        parentModel: user,
-        url: '/mynotes' // custom URL
-    });
+  var viewTemplate = "<div class=\"title\"><strong>Template Note #{{id}}</strong>" +
+    "</div>" +
+    "<div class=\"body\">" +
+    "<p>" +
+    "{{text}}" +
+    "</p>" +
+    "<button id=\"edit\">edit</button>" +
+    "<button id=\"delete\">delete</button>" +
+    "</div>";
+  var editTemplate = "<div class=\"title\"><strong>Template Edit Note #{{id}}</strong>" +
+    "</div>" +
+    "<div class=\"body\">" +
+    "<textarea id=\"editElement\">" +
+    "{{text}}" +
+    "</textarea>" +
+    "<button id=\"update\">update</button>" +
+    "<button id=\"cancel\">cancel</button>" +
+    "</div>";
 
-    /*
+  Notes.ViewTemplate.setTemplate(viewTemplate); // set the view template
+  Notes.EditTemplate.setTemplate(editTemplate); // set the edit template
+
+  // add note when button `Add Note` is pressed
+  $('#add').click(function() {
+    userNotes.addNote($('#textElement').val());
+  });
+
+  // listening triggers
+  userNotes.on('note:created', function() {
+    console.log("created triggered");
+  });
+  userNotes.on('note:deleted', function() {
+    console.log("deleted triggered");
+  });
+  userNotes.on('note:aborted', function() {
+    console.log("aborted triggered");
+  });
+  userNotes.on('note:saved', function() {
+    console.log("saved triggered");
+  });
+  /*
     // Notes collection test
     var userNotes = new Notes.Collection([], {
         parentModel: user,
@@ -59,4 +100,4 @@
     // console.log('Notes -', userNotes);
     */
 
-})(Backbone, Notes);
+})(Backbone, Mustache, Notes);

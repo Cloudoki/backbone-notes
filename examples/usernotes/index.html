@@ -8,25 +8,14 @@
 <body>
     <div id="notes">
         <div id="title"><strong>Make New Note</strong></div>
-        <textarea id="text"></textarea>
+        <textarea id="textElement"></textarea>
         <br />
         <button id="add">Add Note</button>
-        <div id="notesContainer"></div>
     </div>
-    <script id="noteTemplate" type="text/template">
-        <div class="title"><strong>Note #<%= id %></strong>
-        </div>
-        <div class="body">
-            <p>
-                <%= text %>
-            </p>
-            <button id="edit">edit</button>
-            <button id="delete">delete</button>
-        </div>
-    </script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.2.3/backbone-min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
     <script type="text/javascript" src="../../index.js"></script>
     <script type="text/javascript" src="usernotes.js"></script>
 </body>
