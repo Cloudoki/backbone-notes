@@ -63,6 +63,11 @@ var viewTemplate = "<div class=\"title\"><strong>Template Note #{{id}}</strong>"
   Notes.ViewTemplate.setTemplate(viewTemplate); // set the view template
   Notes.EditTemplate.setTemplate(editTemplate); // set the edit template
 ```
+In order for the plugin to detect the clicking events for editing, deleting, updating or cancel de edition of a note the templates **must have**:
+- Html element with **id="edit"**:   used to show the editing view
+- Html element with **id="delete"**: used to delete the note
+- Html element with **id="update"**: used to update the note in editing view
+- Html element with **id="cancel"**: used to cancel the editing
 
 ### Adding a note:
 ```html
