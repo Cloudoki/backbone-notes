@@ -209,6 +209,7 @@
       });
       // get events triggered from note view and propagate them
       noteView.on('note:deleted', function() {
+        self.collection.remove(noteView.model);
         self.trigger('note:deleted');
       });
       noteView.on('note:aborted', function() {
