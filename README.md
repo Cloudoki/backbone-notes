@@ -103,7 +103,7 @@ With the notes collection you can initialize the notes list:
   });
 ```
 
-And you can fetch the notes from the server and render the Notes CollectionView
+And you can fetch the notes from the server and render the Notes List
 
 ```javascript
   // fetch the notes and render them if successful
@@ -125,7 +125,7 @@ And you can initialize and render the view for the notes creation associated wit
   userNotesCreate.render();
 ```
 
-### Listening to the Notes CollectionView events:
+### Listening to the Notes List View events:
 
 There are 4 events that the CollectionView emits:
 - **'note:create'**: when a note is created with success
