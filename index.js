@@ -1,22 +1,25 @@
 (function(root, main) {
   // AMD
   if (typeof define === 'function' && define.amd) {
-    define(['backbone', 'mustache'],
-      function(Backbone, Mustache) {
-        return main(Backbone, Mustache);
+    define(['backbone', 'mustache', 'underscore'],
+      function(Backbone, Mustache, _) {
+        return main(Backbone, Mustache, _);
       });
     // CommonJS
   } else if (typeof exports !== 'undefined' && typeof require !== 'undefined') {
-    module.exports = main(require('backbone'), require('mustache'));
+    module.exports = main(require('backbone'), require('mustache'), require('underscore'));
     // Globals
   } else {
-    root.Notes = main(root.Backbone, root.Mustache);
+    root.Notes = main(root.Backbone, root.Mustache, root._);
   }
-})(this, function(Backbone, Mustache) {
+})(this, function(Backbone, Mustache, _) {
   'use strict';
-
+  // Base Plugin Object without prototype
   var Notes = Object.create(null);
 
+  /**
+   * Base Notes model exposed on the Notes Object to be easily replaced
+   */
   Notes.Model = Backbone.Model.extend({
     defaults: {
       text: ""
@@ -25,204 +28,214 @@
 
   /**
    * Collection of Notes associated with a parent Model
+   * @param {array | Backbone.Model} models
+   * @param {object} options
+   * @param {Backbone.Model} options.parentModel
+   * @param {string} options.url
    */
   Notes.Collection = Backbone.Collection.extend({
     model: Notes.Model,
-    // initialize parentModel and collection URL
+    // called on initialization
     initialize: function(models, options) {
       this.parentModel = options.parentModel;
       this._url = options.url;
     },
     /**
-     * Associate collection URL with the parent Model URL
+     * Associated collection URL with the parent Model URL
      * @return {string | undefined}
      */
     url: function() {
-      return this.parentModel ? this.parentModel.url() +
-        (this._url || '/notes') : undefined;
+      return this.parentModel ? this.parentModel.url() + '/' +
+        (this._url || 'notes') : undefined;
     }
   });
 
-  Notes.ViewTemplate = {
-    template: "<h2>Please add a view template to show here.</h2>",
-    /**
-     * Set the mustache template for the note view
-     * @param {string} tmpl mustache template
-     * @return {void}
-     */
-    setTemplate: function(tmpl) {
-      this.template = tmpl || this.template;
-    },
-    /**
-     * Get the mustache template for note view
-     * @return {string} mustache template
-     */
-    getTemplate: function() {
-      return this.template;
-    }
-  };
+  Notes.Views = Object.create(null);
 
-  Notes.EditTemplate = {
-    template: "<h2>Please add a edit template to show here.</h2>",
-    /**
-     * Set the mustache template for the note editing
-     * @param {string} tmpl mustache template
-     * @return {void}
-     */
-    setTemplate: function(tmpl) {
-      this.template = tmpl || this.template;
-    },
-    /**
-     * Get the mustache template for note editing
-     * @return {string} mustache template
-     */
-    getTemplate: function() {
-      return this.template;
-    }
-  };
-
-  Notes.View = Backbone.View.extend({
-    editElement: '#editnote',
-    oldText: '',
+  /**
+   * Single Note view with edit mode and view mode
+   *
+   * @borrows Notes.Templates.view  mustache template for the view mode
+   * @borrows Notes.Templates.edit  mustache template for the edit mode
+   *
+   * @listens {.note-action-destroy#click} triggers destroy method
+   * @listens {.note-action-save#click} triggers save method
+   * @listens {.note-action-cancel#click} triggers cancel methods
+   *
+   * @param {object} options Backbone.View options
+   *                         {@link http://backbonejs.org/#View-constructor}
+   * @param {object} options.model  this view expects an model
+   * @param {object} options.save   options used on the Notes.Model.save method
+   *                                {@link http://backbonejs.org/#Model-save}
+   * @param {object} options.destroy  options used on the Notes.Model.destroy
+   *                                  {@link http://backbonejs.org/#Model-destroy}
+   * @return {Backbone.View}
+   */
+  Notes.Views.Note = Backbone.View.extend({
     events: {
-      'click #delete': 'removeNote',
-      'click #edit': 'editNote',
-      'click #update': 'updateNote',
-      'click #cancel': 'cancelEdit'
+      'click .note-action-destroy': 'destroy',
+      'click .note-action-edit': 'edit',
+      'click .note-action-save': 'save',
+      'click .note-action-cancel': 'cancel'
     },
-    /**
-     * Set the element for the editing
-     * @param  {object} options Object with need parameters such as editElement
-     * @return {void}
-     */
     initialize: function(options) {
-      this.editElement = options.editElement || this.editElement;
+      var self = this;
+      self.options = options || {};
+
+      // sets the self.options.save to have a always success property that
+      //  will call the save.success if it was provided and
+      //  options.destroy.wait is true by default
+      self.options.save = _.defaults({
+        // on successfull save
+        success: function(model, response) {
+          // renders this note to view mode
+          this.render();
+          /**
+           * Indicates that the note was saved
+           * @event Notes.Views.Note#note:save
+           * @type {Notes.Model}
+           */
+          self.trigger('note:save', model);
+
+          // if options.save.success was provided call it also
+          if (options.save && options.save.success) {
+            options.save.success.apply(this, arguments);
+          }
+        }
+      }, options.save, {
+        wait: true
+      });
+
+      // sets the self.options.destroy to have a always success property that
+      //  will call the destroy.success if it was provided and
+      //  options.destroy.wait is true by default
+      self.options.destroy = _.defaults({
+        success: function(model, response) {
+          self.remove();
+          /**
+           * Indicates that the note was destroyed
+           * @event Notes.Views.Note#note:destroy
+           * @type {Notes.Model}
+           */
+          self.trigger('note:destroy', model);
+
+          // if options.destroy.success was provided call it also
+          if (options.destroy && options.destroy.success) {
+            options.destroy.success.apply(this, arguments);
+          }
+        }
+      }, options.destroy, {
+        wait: true
+      });
     },
     /**
-     * Render note
-     * @return {void}
+     * Render note with view template by default
+     *
+     * @borrows Notes.Templates.View
+     * @param {Mustache.template} template
+     * @return {Notes.Views.Note}
      */
     render: function(tmpl) {
-      var tmpl = tmpl || Notes.ViewTemplate.getTemplate();
-      this.$el.html(Mustache.render(tmpl, this.model.toJSON()));
+      var template = tmpl || Notes.Templates.view;
+      this.$el.html(Mustache.render(template, this.model.toJSON()));
       return this;
     },
     /**
-     * Show editing view to allow note edition
-     * @return {void}
+     * Renders the note with the edit template (edit mode) and focus given to
+     *   .note-data-text. Saves the current model text to this.oldText be able to
+     *   cancel changes
+     *
+     * @borrows Notes.Templates.edit
      */
-    editNote: function() {
+    edit: function() {
       this.oldText = this.model.get('text');
-      this.render(Notes.EditTemplate.getTemplate());
-      $(this.editElement).focus();
+      this.render(Notes.Templates.edit);
+      this.$('.note-data-text').focus();
     },
     /**
-     * Update the model if edited and save
-     * @return {void}
+     * Update the model if '.note-text' element's value changed compared
+     * this.oldText and re-renders to view mode
+     *
+     * @fires Notes.Views.Note#note:save
      */
-    updateNote: function() {
-      var self = this;
-      var newText = $(this.editElement).val();
+    save: function() {
+      var newText = this.$('.note-data-text').val();
       if (newText !== this.oldText) {
         this.model.set('text', newText);
-        this.model.save({
-          wait: true,
-          success: function(model, response) {
-            self.render();
-            self.trigger('note:saved');
-          }
-        });
+        this.model.save(this.options.save);
       }
     },
     /**
-     * Cancel edit mode
-     * @return {void}
+     * Cancel edit mode and set the text to this.oldText that was set when
+     *   changed from view to edit mode
+     *
+     * @fires Notes.Views.Note#note:cancel
      */
-    cancelEdit: function() {
+    cancel: function() {
       this.model.set('text', this.oldText);
       this.render();
-      this.trigger('note:aborted');
+      /**
+       * Indicates that the note edition was cancel
+       * @event Notes.View#note:cancel
+       * @type {Notes.Model}
+       */
+      this.trigger('note:cancel', this.model);
     },
     /**
-     * Remove the note
-     * @return {void}
+     * Destroys the note model and removes the view
+     *
+     * @fires Notes.View#note:destroy
      */
-    removeNote: function() {
-      var self = this;
-      this.model.destroy({
-        wait: true,
-        success: function(model, response) {
-          self.remove();
-          self.trigger('note:deleted');
-        }
-      });
+    destroy: function() {
+      this.model.destroy(this.options.destroy);
     }
   });
-
-  Notes.CollectionView = Backbone.View.extend({
-    el: 'body',
-    editElement: '#editnote',
+  /**
+   * Notes list view, nested view of a collection of NoteViews
+   *
+   * @param {object} options Backbone.View options
+   *                         {@link http://backbonejs.org/#View-constructor}
+   * @param {Notes.Collection} options.collection
+   *
+   * @return {Backbone.View}
+   */
+  Notes.Views.List = Backbone.View.extend({
     initialize: function(options) {
       var self = this;
-      this.editElement = options.editElement || this.editElement;
-      this.collection = new Notes.Collection([], {
-        parentModel: options.parentModel,
-        url: options.url
-      });
-      this.collection.fetch({
-        success: function() {
-          self.render();
-        }
-      });
+      self.options = options || {};
+      this.collection = options.collection;
+    },
 
-      this.listenTo(this.collection, 'add', this.renderNode);
-      this.listenTo(this.collection, 'reset', this.render);
-    },
-    /**
-     * Add note to the note collection
-     * @return {void}
-     */
-    addNote: function(txt) {
-      var self = this;
-      var noteData = {};
-      noteData['text'] = txt;
-      this.collection.create(noteData, {
-        wait: true, // waits for server to respond with 200 before adding newly
-        // created model to collection
-        success: function() {
-          self.renderNote();
-          self.trigger('note:created');
-        }
-      });
-    },
     /**
      * Render a note by creating a NoteView and appending the element
-     * it renders to the collection element
+     * it renders to the collection element and setups listeners to the NoteView
+     * events that are propagated to the collection
+     *
      * @param  {Backbone.model}
-     * @return {void}
      */
     renderNote: function(item) {
       var self = this;
-      var noteView = new Notes.View({
+      var noteView = new Notes.Views.Note({
         model: item,
-        editElement: this.editElement
       });
       // get events triggered from note view and propagate them
-      noteView.on('note:deleted', function() {
+      noteView.on('note:destroy', function(model) {
         self.collection.remove(noteView.model);
-        self.trigger('note:deleted');
+        self.trigger('note:destroy', model);
       });
-      noteView.on('note:aborted', function() {
-        self.trigger('note:aborted')
+      noteView.on('note:cancel', function(model) {
+        self.trigger('note:cancel', model);
       });
-      noteView.on('note:saved', function() {
-        self.trigger('note:saved')
+      noteView.on('note:save', function(model) {
+        self.trigger('note:save', model);
       });
       this.$el.append(noteView.render().el);
     },
     /**
-     * Render notes collection by rendering each note it contains
-     * @return {void}
+     * Renders the element with create template and appends to all the
+     * notes in the collection which are also rendered
+     *
+     * @borrows Notes.Templates.create
      */
     render: function() {
       this.collection.each(function(item) {
@@ -230,6 +243,72 @@
       }, this);
     }
   });
+  /**
+   * Creatition view for the creation of notes
+   *
+   * @borrows Notes.Templates.create  mustache template for the creation
+   *
+   * @listens {.node-action-create#click} triggers create method
+   *
+   * @param {object} options Backbone.View options
+   *                         {@link http://backbonejs.org/#View-constructor}
+   * @param {Notes.Views.List} options.list
+   * @param {object} options.create options used on the Notes.Collection.create
+   *                                {@link http://backbonejs.org/#Collection-create}
+   */
+  Notes.Views.Create = Backbone.View.extend({
+    events: {
+      'click .note-action-create': 'create'
+    },
+    initialize: function(options) {
+      var self = this;
+      self.options = options || {};
+      this.viewList = options.viewList;
+      // sets the self.options.create to have a always success property that
+      //  will call the create.success if it was provided and
+      //  options.create.wait is true by default
+      this.options.create = _.defaults({
+        success: function(model, response) {
+          self.viewList.renderNote(model);
+          /**
+           * Indicates that the note was created
+           * @event Notes.Views.Note#note:create
+           * @type {Notes.Model}
+           */
+          self.viewList.trigger('note:create', model);
+
+          // if options.destroy.success was provided call it also
+          if (options.create && options.create.success) {
+            options.create.success.apply(this, arguments)
+          }
+        }
+      }, options.create, {
+        wait: true
+      });
+    },
+    /**
+     * Add note to the note collection with text as the value of the element
+     *  retrived with selector '.note-data-text'
+     */
+    create: function() {
+      var self = this;
+      this.viewList.collection.create({
+        text: this.$('.note-data-text').val()
+      }, this.options.create);
+    },
+    /**
+     * Renders the element with create template and appends to all the
+     * notes in the collection which are also rendered
+     *
+     * @borrows Notes.Templates.create
+     */
+    render: function(template) {
+      // NOTE: consider if necessary use of mustache render if no object is
+      // passed to the template
+      this.$el.html(Mustache.render(template || Notes.Templates.create));
+    }
+
+  })
 
   return Notes;
 });
