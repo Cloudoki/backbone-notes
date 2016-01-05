@@ -89,7 +89,7 @@
         // on successfull save
         success: function(model, response) {
           // renders this note to view mode
-          this.render();
+          self.render();
           /**
            * Indicates that the note was saved
            * @event Notes.Views.Note#note:save
@@ -162,7 +162,7 @@
       var newText = this.$('.note-data-text').val();
       if (newText !== this.oldText) {
         this.model.set('text', newText);
-        this.model.save(this.options.save);
+        this.model.save(null, this.options.save);
       }
     },
     /**
