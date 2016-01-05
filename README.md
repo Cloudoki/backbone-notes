@@ -15,6 +15,8 @@ Add notes to your Backbone Models and render them with Mustache Templates
 
 ## Usage
 
+### Templates
+
 You will need to provide 3 Mustache templates: one for viewing the notes, one for the editing of the notes and other for the creation. Before you are able to render the notes.
 
 ```javascript
@@ -54,13 +56,16 @@ In order for the plugin to detect the clicking events and textarea fields you th
  - `.note-action-save` save the changes on edit mode (and go to view mode)
  - `.note-action-cancel` cancel the changes on edit mode (and go to view mode)
 
+### Containers
 
-Start with the elements for the list and creation
+You will need to provide the elements for the list and creation views
 
 ```html
 <div id="notes-create"></div>
 <div id="notes-list"></div>
 ```
+
+### ParentModel
 
 You will also need an parent model for the notes to associate with:
 
@@ -81,53 +86,21 @@ You will also need an parent model for the notes to associate with:
   });
 ```
 
-Now you will need to create the notes collection
+### Initialization
+
+You may use the `Notes.init` function for standart use of the plugin 
 
 ```javascript
-  var userNotesCollection = new Notes.Collection([], {
-    // adding the notes parent
+  var userNotes = Notes.init({
     parentModel: user,
-    // relative URL to get notes from user's base url that is:
-    // users/{user.id}/notes
-    url: 'notes',
-  });
-```
-
-With the notes collection you can initialize the notes list:
-
-```javascript
-  var userNotesList = new Notes.Views.List({
-    // where to add the notes to
-    el: $('#notes-list'),
-    collection: userNotesCollection
-  });
-```
-
-And you can fetch the notes from the server and render the Notes List
-
-```javascript
-  // fetch the notes and render them if successful
-  userNotesCollection.fetch({
-    success: function() {
-      userNotesList.render();
-    }
-  });
-```
-
-And you can initialize and render the view for the notes creation associated with the userNotesList view
-
-```javascript
-  var userNotesCreate = new Notes.Views.Create({
-    // where to create the notes
-    el: $('#notes-create'),
-    viewList: userNotesList
-  });
-  userNotesCreate.render();
+    listElement: $('#notes-list'),
+    createElement: $('#notes-create'),
+  })
 ```
 
 ### Listening to the Notes List View events:
 
-There are 4 events that the CollectionView emits:
+There are 4 events that the list view emits:
 - **'note:create'**: when a note is created with success
 - **'note:destroy'**: when a note is deleted with success
 - **'note:save'**: when a note is edited and update with success
@@ -135,16 +108,16 @@ There are 4 events that the CollectionView emits:
 
 ```javascript
   // listening triggers
-  userNotesList.on('note:create', function() {
+  userNotes.view.list.on('note:create', function() {
     console.log('note created');
   });
-  userNotesList.on('note:destroy', function() {
+  userNotes.view.list.on('note:destroy', function() {
     console.log('note destroyed');
   });
-  userNotesList.on('note:cancel', function() {
+  userNotes.view.list.on('note:cancel', function() {
     console.log('note cancelled');
   });
-  userNotesList.on('note:save', function() {
+  userNotes.view.list.on('note:save', function() {
     console.log('note saved');
   });
 ```

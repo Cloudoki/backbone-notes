@@ -253,6 +253,7 @@
    * @param {object} options Backbone.View options
    *                         {@link http://backbonejs.org/#View-constructor}
    * @param {Notes.Views.List} options.list
+   * @param {object} options.data
    * @param {object} options.create options used on the Notes.Collection.create
    *                                {@link http://backbonejs.org/#Collection-create}
    */
@@ -262,7 +263,10 @@
     },
     initialize: function(options) {
       var self = this;
-      self.options = options || {};
+      this.options = options || {};
+      this.options.data = _.defaults(options.data || {}, {
+        text: 'insert note text here'
+      })
       this.viewList = options.viewList;
       // sets the self.options.create to have a always success property that
       //  will call the create.success if it was provided and
@@ -303,12 +307,78 @@
      * @borrows Notes.Templates.create
      */
     render: function(template) {
-      // NOTE: consider if necessary use of mustache render if no object is
-      // passed to the template
-      this.$el.html(Mustache.render(template || Notes.Templates.create));
+      this.$el.html(Mustache.render(template || Notes.Templates.create,
+        this.options.data));
+    }
+  });
+  /**
+   * Initializes the a Notes.Collection and the corresponding
+   *   list and create view
+   * @param {object} options
+   * @param {Backbone.Model} options.parentModel
+   * @param {string} options.url - (default: 'notes')
+   * @param {DOM.Element | object | string} options.listElement - element
+   *                       associated with the list view
+   *                       {@link http://backbonejs.org/#View-el}
+   * @param {DOM.Element | object | string} options.createElement - element
+   *                       associated with the create view
+   *                       {@link http://backbonejs.org/#View-el)
+   * @param {boolean} options.fetch - if true fetchs the Notes.Collection and
+   *                                 will render the new list if options.render
+   *                                 (default: true)
+   * @param {boolean} options.render - if true renders the generated views
+   *                                 (default: true)
+   * @return {object} instance - returns an instance object with the collection
+   *                             and views
+   * @return {Notes.Collection} instance.collection -  notes collection created
+   * @return {Notes.Views.List} instance.view.list - notes list view
+   * @return {Notes.Views.Create} instance.view.create - notes create view
+   */
+  Notes.init = function(options) {
+    var opts = _.defaults(options, {
+      render: true,
+      fetch: true
+    });
+
+    var instance = {
+      view: {}
+    };
+
+    instance.collection = new Notes.Collection([], {
+      parentModel: options.parentModel,
+      url: options.url,
+    });
+
+    if (opts.listElement) {
+      instance.view.list = new Notes.Views.List({
+        el: opts.listElement,
+        collection: instance.collection
+      });
     }
 
-  })
+    if (instance.view.list && opts.createElement) {
+      instance.view.create = new Notes.Views.Create({
+        el: opts.createElement,
+        listView: instance.view.list
+      })
+    }
 
+    if (opts.fetch) {
+      instance.collection.fetch({
+        success: function() {
+          if (instance.view.list && opts.render) {
+            instance.view.list.render();
+          }
+        }
+      });
+    }
+
+    if (opts.render) {
+      if (instance.view.list) instance.view.list.render();
+      if (instance.view.create) instance.view.create.render();
+    }
+
+    return instance;
+  };
   return Notes;
 });

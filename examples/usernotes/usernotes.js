@@ -21,7 +21,7 @@
           </div>',
     create: '<div class="note-create">\
               <div class="note-body">\
-                <textarea class="note-data-text"></textarea>\
+                <textarea class="note-data-text">{{text}}</textarea>\
                 <br/>\
                 <button class="note-action-create">Add</button>\
               </div>\
@@ -42,47 +42,24 @@
     name: 'John Doe'
   });
 
-  var userNotesCollection = new Notes.Collection([], {
-    // adding the notes parent
+  var userNotes = Notes.init({
     parentModel: user,
-    // relative URL to get notes from user's base url that is:
-    // users/{user.id}/notes
-    url: 'notes',
-  });
-
-  var userNotesList = new Notes.Views.List({
-    // where to add the notes to
-    el: $('#notes-list'),
-    collection: userNotesCollection
-  });
+    listElement: $('#notes-list'),
+    createElement: $('#notes-create'),
+  })
 
   // listening triggers
-  userNotesList.on('note:create', function() {
+  userNotes.view.list.on('note:create', function() {
     console.log('note created');
   });
-  userNotesList.on('note:destroy', function() {
+  userNotes.view.list.on('note:destroy', function() {
     console.log('note destroyed');
   });
-  userNotesList.on('note:cancel', function() {
+  userNotes.view.list.on('note:cancel', function() {
     console.log('note cancelled');
   });
-  userNotesList.on('note:save', function() {
+  userNotes.view.list.on('note:save', function() {
     console.log('note saved');
   });
-
-  // fetch the notes and render them if successful
-  userNotesCollection.fetch({
-    success: function() {
-      userNotesList.render();
-    }
-  });
-
-  var userNotesCreate = new Notes.Views.Create({
-    // where to create the notes
-    el: $('#notes-create'),
-    viewList: userNotesList
-  });
-
-  userNotesCreate.render();
 
 })(Backbone, Mustache, _, $, Notes);
