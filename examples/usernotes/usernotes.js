@@ -2,7 +2,7 @@
   'use strict';
 
   // setting the required notes templates
-  Notes.Templates = {
+  var viewTemplates = {
     view: '<div class="note-view">\
             <div class="note-title"><strong>Note {{id}}</strong></div>\
             <div class="note-body">\
@@ -18,7 +18,9 @@
               <button class="note-action-save">save</button>\
               <button class="note-action-cancel">cancel</button>\
             </div>\
-          </div>',
+          </div>'
+  };
+  var createTemplate = {
     create: '<div class="note-create">\
               <div class="note-body">\
                 <textarea class="note-data-text" placeholder="{{text}}"></textarea>\
@@ -46,6 +48,8 @@
     parentModel: user,
     listElement: $('#notes-list'),
     createElement: $('#notes-create'),
+    templates: viewTemplates,
+    createTemplate: createTemplate
   })
 
   // listening triggers

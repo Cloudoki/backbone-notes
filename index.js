@@ -14,8 +14,6 @@
   }
 })(this, function(Backbone, Mustache, _) {
 
-  // TODO: no Global template (associate a template to each view)
-  // TODO: Add templates as Notes.init arguments
   // TODO: Fix documentation - no nested returns, replace @return => @returns
 
   'use strict';
@@ -55,6 +53,32 @@
     }
   });
 
+  Notes.Templates = {
+    view: '<div class="note-view">\
+            <div class="note-title"><strong>Note {{id}}</strong></div>\
+            <div class="note-body">\
+              <p class="note-data-text">{{text}}</p>\
+              <button class="note-action-edit">edit</button>\
+              <button class="note-action-destroy">destroy</button>\
+            </div>\
+          </div>',
+    edit: '<div class="note-edit">\
+            <div class="note-title"><strong>Note {{id}}</strong></div>\
+            <div class="note-body">\
+              <textarea class="note-data-text">{{text}}</textarea>\
+              <button class="note-action-save">save</button>\
+              <button class="note-action-cancel">cancel</button>\
+            </div>\
+          </div>',
+    create: '<div class="note-create">\
+              <div class="note-body">\
+                <textarea class="note-data-text" placeholder="{{text}}"></textarea>\
+                <br/>\
+                <button class="note-action-create">Add</button>\
+              </div>\
+            </div>'
+  };
+
   Notes.Views = Object.create(null);
 
   /**
@@ -86,6 +110,7 @@
     initialize: function(options) {
       var self = this;
       self.options = options || {};
+      this.templates = options.templates;
 
       // sets the self.options.save to have a always success property that
       //  will call the save.success if it was provided and
@@ -141,7 +166,7 @@
      * @return {Notes.Views.Note}
      */
     render: function(tmpl) {
-      var template = tmpl || Notes.Templates.view;
+      var template = tmpl || this.templates.view;
       this.$el.html(Mustache.render(template, this.model.toJSON()));
       return this;
     },
@@ -154,7 +179,7 @@
      */
     edit: function() {
       this.oldText = this.model.get('text');
-      this.render(Notes.Templates.edit);
+      this.render(this.templates.edit);
       this.$('.note-data-text').focus();
     },
     /**
@@ -209,6 +234,10 @@
       var self = this;
       self.options = options || {};
       this.collection = options.collection;
+      this.templates = options.templates || {
+        view: Notes.Templates.view,
+        edit: Notes.Templates.edit
+      };
     },
 
     /**
@@ -222,6 +251,7 @@
       var self = this;
       var noteView = new Notes.Views.Note({
         model: item,
+        templates: this.templates
       });
       // get events triggered from note view and propagate them
       noteView.on('note:destroy', function(model) {
@@ -269,6 +299,9 @@
     initialize: function(options) {
       var self = this;
       this.options = options || {};
+      this.template = options.template || {
+        create: Notes.Templates.create
+      };
       this.options.data = _.defaults(options.data || {}, {
         text: 'insert note text here'
       })
@@ -312,7 +345,7 @@
      * @borrows Notes.Templates.create
      */
     render: function(template) {
-      this.$el.html(Mustache.render(template || Notes.Templates.create,
+      this.$el.html(Mustache.render(template || this.template.create,
         this.options.data));
     }
   });
@@ -357,14 +390,16 @@
     if (opts.listElement) {
       instance.view.list = new Notes.Views.List({
         el: opts.listElement,
-        collection: instance.collection
+        collection: instance.collection,
+        templates: opts.templates
       });
     }
 
     if (instance.view.list && opts.createElement) {
       instance.view.create = new Notes.Views.Create({
         el: opts.createElement,
-        viewList: instance.view.list
+        viewList: instance.view.list,
+        template: opts.createTemplate
       })
     }
 
