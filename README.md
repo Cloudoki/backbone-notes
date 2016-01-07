@@ -21,7 +21,7 @@ You will need to provide 3 Mustache templates: one for viewing the notes, one fo
 
 ```javascript
   // Create the templates
-  Notes.Templates = {
+  var viewTemplates = {
     view: '<div class="note-view">\
             <div class="note-title"><strong>Note {{id}}</strong></div>\
             <div class="note-body">\
@@ -37,15 +37,17 @@ You will need to provide 3 Mustache templates: one for viewing the notes, one fo
               <button class="note-action-save">save</button>\
               <button class="note-action-cancel">cancel</button>\
             </div>\
-          </div>',
+          </div>'
+  };
+  var createTemplate = {
     create: '<div class="note-create">\
               <div class="note-body">\
-                <textarea class="note-data-text"></textarea>\
+                <textarea class="note-data-text" placeholder="{{text}}"></textarea>\
                 <br/>\
                 <button class="note-action-create">Add</button>\
               </div>\
             </div>'
-}
+  };
 ```
 
 In order for the plugin to detect the clicking events and textarea fields you the following selectors are used, so the those classes are required:
@@ -95,6 +97,8 @@ You may use the `Notes.init` function for standart use of the plugin
     parentModel: user,
     listElement: $('#notes-list'),
     createElement: $('#notes-create'),
+    templates: viewTemplates,
+    createTemplate: createTemplate
   })
 ```
 
