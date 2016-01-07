@@ -13,6 +13,10 @@
     root.Notes = main(root.Backbone, root.Mustache, root._);
   }
 })(this, function(Backbone, Mustache, _) {
+
+  // TODO: no Global template (associate a template to each view)
+  // TODO: Add templates as Notes.init arguments
+
   'use strict';
   // Base Plugin Object without prototype
   var Notes = Object.create(null);
@@ -359,7 +363,7 @@
     if (instance.view.list && opts.createElement) {
       instance.view.create = new Notes.Views.Create({
         el: opts.createElement,
-        listView: instance.view.list
+        viewList: instance.view.list
       })
     }
 

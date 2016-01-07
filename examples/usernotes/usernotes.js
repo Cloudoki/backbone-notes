@@ -21,7 +21,7 @@
           </div>',
     create: '<div class="note-create">\
               <div class="note-body">\
-                <textarea class="note-data-text">{{text}}</textarea>\
+                <textarea class="note-data-text" placeholder="{{text}}"></textarea>\
                 <br/>\
                 <button class="note-action-create">Add</button>\
               </div>\
