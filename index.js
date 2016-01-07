@@ -16,6 +16,7 @@
 
   // TODO: no Global template (associate a template to each view)
   // TODO: Add templates as Notes.init arguments
+  // TODO: Fix documentation - no nested returns, replace @return => @returns
 
   'use strict';
   // Base Plugin Object without prototype
