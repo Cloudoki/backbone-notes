@@ -9,7 +9,7 @@ Add notes to your Backbone Models and render them with Mustache Templates
 
 ## Instalation
 
-- **Script Tag:** `<script type="text/javascript" src="https://github.com/Cloudoki/backbone-notes/blob/master/index.js"></script>`
+- **Script Tag:** `<script type="text/javascript" src="http://cdn.rawgit.com/Cloudoki/backbone-notes/blob/master/index.js"></script>`
 - **Bower:** `bower install git://github.com/Cloudoki/backbone-notes.git`
 - **npm:** `npm install github:Cloudoki/backbone-notes`
 
@@ -90,7 +90,7 @@ You will also need an parent model for the notes to associate with:
 
 ### Initialization
 
-You may use the `Notes.init` function for standart use of the plugin 
+You may use the `Notes.init` function for standart use of the plugin
 
 ```javascript
   var userNotes = Notes.init({

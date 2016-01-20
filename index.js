@@ -1,19 +1,20 @@
-(function(root, main) {
+(function (root, main) {
   // AMD
   if (typeof define === 'function' && define.amd) {
     define(['backbone', 'mustache', 'underscore'],
-      function(Backbone, Mustache, _) {
+      function (Backbone, Mustache, _) {
         return main(Backbone, Mustache, _);
       });
-    // CommonJS
-  } else if (typeof exports !== 'undefined' && typeof require !== 'undefined') {
+  // CommonJS
+  } else if (typeof module === 'object' && module.exports && require) {
     module.exports = main(require('backbone'), require('mustache'), require('underscore'));
-    // Globals
+  // Globals
   } else {
+    /* eslint-disable no-param-reassign */
     root.Notes = main(root.Backbone, root.Mustache, root._);
+    /* eslint-enable no-param-reassign */
   }
-})(this, function(Backbone, Mustache, _) {
-
+})(this, function (Backbone, Mustache, _) {
   // TODO: Fix documentation - no nested returns, replace @return => @returns
 
   'use strict';
@@ -25,7 +26,7 @@
    */
   Notes.Model = Backbone.Model.extend({
     defaults: {
-      text: ""
+      text: ''
     }
   });
 
@@ -39,7 +40,7 @@
   Notes.Collection = Backbone.Collection.extend({
     model: Notes.Model,
     // called on initialization
-    initialize: function(models, options) {
+    initialize: function (models, options) {
       this.parentModel = options.parentModel;
       this._url = options.url;
     },
@@ -47,36 +48,36 @@
      * Associated collection URL with the parent Model URL
      * @return {string | undefined}
      */
-    url: function() {
+    url: function () {
       return this.parentModel ? this.parentModel.url() + '/' +
         (this._url || 'notes') : undefined;
     }
   });
 
   Notes.Templates = {
-    view: '<div class="note-view">\
-            <div class="note-title"><strong>Note {{id}}</strong></div>\
-            <div class="note-body">\
-              <p class="note-data-text">{{text}}</p>\
-              <button class="note-action-edit">edit</button>\
-              <button class="note-action-destroy">destroy</button>\
-            </div>\
-          </div>',
-    edit: '<div class="note-edit">\
-            <div class="note-title"><strong>Note {{id}}</strong></div>\
-            <div class="note-body">\
-              <textarea class="note-data-text">{{text}}</textarea>\
-              <button class="note-action-save">save</button>\
-              <button class="note-action-cancel">cancel</button>\
-            </div>\
-          </div>',
-    create: '<div class="note-create">\
-              <div class="note-body">\
-                <textarea class="note-data-text" placeholder="{{text}}"></textarea>\
-                <br/>\
-                <button class="note-action-create">Add</button>\
-              </div>\
-            </div>'
+    view: '<div class="note-view">' +
+            '<div class="note-title"><strong>Note {{id}}</strong></div>' +
+            '<div class="note-body">' +
+              '<p class="note-data-text">{{text}}</p>' +
+              '<button class="note-action-edit">edit</button>' +
+              '<button class="note-action-destroy">destroy</button>' +
+            '</div>' +
+          '</div>',
+    edit: '<div class="note-edit">' +
+            '<div class="note-title"><strong>Note {{id}}</strong></div>' +
+            '<div class="note-body">' +
+              '<textarea class="note-data-text">{{text}}</textarea>' +
+              '<button class="note-action-save">save</button>' +
+              '<button class="note-action-cancel">cancel</button>' +
+            '</div>' +
+          '</div>',
+    create: '<div class="note-create">' +
+              '<div class="note-body">' +
+                '<textarea class="note-data-text" placeholder="{{text}}"></textarea>' +
+                '<br/>' +
+                '<button class="note-action-create">Add</button>' +
+              '</div>' +
+            '</div>'
   };
 
   Notes.Views = Object.create(null);
@@ -98,7 +99,7 @@
    *                                {@link http://backbonejs.org/#Model-save}
    * @param {object} options.destroy  options used on the Notes.Model.destroy
    *                                  {@link http://backbonejs.org/#Model-destroy}
-   * @return {Backbone.View}
+   * @returns {Backbone.View}
    */
   Notes.Views.Note = Backbone.View.extend({
     events: {
@@ -107,7 +108,7 @@
       'click .note-action-save': 'save',
       'click .note-action-cancel': 'cancel'
     },
-    initialize: function(options) {
+    initialize: function (options) {
       var self = this;
       self.options = options || {};
       this.templates = options.templates;
@@ -117,7 +118,7 @@
       //  options.destroy.wait is true by default
       self.options.save = _.defaults({
         // on successfull save
-        success: function(model, response) {
+        success: function (model) {
           // renders this note to view mode
           self.render();
           /**
@@ -140,7 +141,7 @@
       //  will call the destroy.success if it was provided and
       //  options.destroy.wait is true by default
       self.options.destroy = _.defaults({
-        success: function(model, response) {
+        success: function (model) {
           self.remove();
           /**
            * Indicates that the note was destroyed
@@ -163,9 +164,9 @@
      *
      * @borrows Notes.Templates.View
      * @param {Mustache.template} template
-     * @return {Notes.Views.Note}
+     * @returns {Notes.Views.Note}
      */
-    render: function(tmpl) {
+    render: function (tmpl) {
       var template = tmpl || this.templates.view;
       this.$el.html(Mustache.render(template, this.model.toJSON()));
       return this;
@@ -177,7 +178,7 @@
      *
      * @borrows Notes.Templates.edit
      */
-    edit: function() {
+    edit: function () {
       this.oldText = this.model.get('text');
       this.render(this.templates.edit);
       this.$('.note-data-text').focus();
@@ -188,7 +189,7 @@
      *
      * @fires Notes.Views.Note#note:save
      */
-    save: function() {
+    save: function () {
       var newText = this.$('.note-data-text').val();
       if (newText !== this.oldText) {
         this.model.set('text', newText);
@@ -201,7 +202,7 @@
      *
      * @fires Notes.Views.Note#note:cancel
      */
-    cancel: function() {
+    cancel: function () {
       this.model.set('text', this.oldText);
       this.render();
       /**
@@ -216,7 +217,7 @@
      *
      * @fires Notes.View#note:destroy
      */
-    destroy: function() {
+    destroy: function () {
       this.model.destroy(this.options.destroy);
     }
   });
@@ -227,10 +228,10 @@
    *                         {@link http://backbonejs.org/#View-constructor}
    * @param {Notes.Collection} options.collection
    *
-   * @return {Backbone.View}
+   * @returns {Backbone.View}
    */
   Notes.Views.List = Backbone.View.extend({
-    initialize: function(options) {
+    initialize: function (options) {
       var self = this;
       self.options = options || {};
       this.collection = options.collection;
@@ -247,21 +248,21 @@
      *
      * @param  {Backbone.model}
      */
-    renderNote: function(item) {
+    renderNote: function (item) {
       var self = this;
       var noteView = new Notes.Views.Note({
         model: item,
         templates: this.templates
       });
       // get events triggered from note view and propagate them
-      noteView.on('note:destroy', function(model) {
+      noteView.on('note:destroy', function (model) {
         self.collection.remove(noteView.model);
         self.trigger('note:destroy', model);
       });
-      noteView.on('note:cancel', function(model) {
+      noteView.on('note:cancel', function (model) {
         self.trigger('note:cancel', model);
       });
-      noteView.on('note:save', function(model) {
+      noteView.on('note:save', function (model) {
         self.trigger('note:save', model);
       });
       this.$el.append(noteView.render().el);
@@ -272,8 +273,8 @@
      *
      * @borrows Notes.Templates.create
      */
-    render: function() {
-      this.collection.each(function(item) {
+    render: function () {
+      this.collection.each(function (item) {
         this.renderNote(item);
       }, this);
     }
@@ -296,7 +297,7 @@
     events: {
       'click .note-action-create': 'create'
     },
-    initialize: function(options) {
+    initialize: function (options) {
       var self = this;
       this.options = options || {};
       this.template = options.template || {
@@ -304,13 +305,13 @@
       };
       this.options.data = _.defaults(options.data || {}, {
         text: 'insert note text here'
-      })
+      });
       this.viewList = options.viewList;
       // sets the self.options.create to have a always success property that
       //  will call the create.success if it was provided and
       //  options.create.wait is true by default
       this.options.create = _.defaults({
-        success: function(model, response) {
+        success: function (model) {
           self.viewList.renderNote(model);
           /**
            * Indicates that the note was created
@@ -321,7 +322,7 @@
 
           // if options.destroy.success was provided call it also
           if (options.create && options.create.success) {
-            options.create.success.apply(this, arguments)
+            options.create.success.apply(this, arguments);
           }
         }
       }, options.create, {
@@ -332,8 +333,7 @@
      * Add note to the note collection with text as the value of the element
      *  retrived with selector '.note-data-text'
      */
-    create: function() {
-      var self = this;
+    create: function () {
       this.viewList.collection.create({
         text: this.$('.note-data-text').val()
       }, this.options.create);
@@ -344,7 +344,7 @@
      *
      * @borrows Notes.Templates.create
      */
-    render: function(template) {
+    render: function (template) {
       this.$el.html(Mustache.render(template || this.template.create,
         this.options.data));
     }
@@ -372,7 +372,7 @@
    * @return {Notes.Views.List} instance.view.list - notes list view
    * @return {Notes.Views.Create} instance.view.create - notes create view
    */
-  Notes.init = function(options) {
+  Notes.init = function (options) {
     var opts = _.defaults(options, {
       render: true,
       fetch: true
@@ -400,12 +400,12 @@
         el: opts.createElement,
         viewList: instance.view.list,
         template: opts.createTemplate
-      })
+      });
     }
 
     if (opts.fetch) {
       instance.collection.fetch({
-        success: function() {
+        success: function () {
           if (instance.view.list && opts.render) {
             instance.view.list.render();
           }
