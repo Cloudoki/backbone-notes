@@ -10,7 +10,7 @@ Add notes to your Backbone Models and render them with Mustache Templates
 
 ## Requirements
 
-- [backbonejs](http://backbonejs.org/)
+- [backbonejs](http://backbonejs.org/) and [underscore](http://underscorejs.org/)
 - [mustache.js](https://github.com/janl/mustache.js)
 
 ## Instalation
