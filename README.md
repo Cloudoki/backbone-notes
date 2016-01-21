@@ -2,6 +2,12 @@
 
 Add notes to your Backbone Models and render them with Mustache Templates
 
+## Features
+
+- Customazible Template generated view and creation of Note
+- Separate element anchor for the creation of notes for more flexibility
+- Association with a specific parent model
+
 ## Requirements
 
 - [backbonejs](http://backbonejs.org/)
@@ -26,7 +32,7 @@ You will need to provide the elements for the list and creation views
 
 ### ParentModel
 
-You will also need an parent model for the notes to associate with:
+You will need an parent model for the notes to associate with:
 
 ```javascript
 // Creating a model to be the notes parent
@@ -59,7 +65,7 @@ You may use the `Notes.init` function for standart use of the plugin
   })
 ```
 
-### Using other Templates
+### Using custom Templates
 
 The module uses 3 Mustache templates: one for viewing the notes, one for the
 editing of the notes and other for the creation. Before you are able to render
