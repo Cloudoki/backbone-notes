@@ -15,8 +15,6 @@
     /* eslint-enable no-param-reassign */
   }
 })(this, function (Backbone, Mustache, _) {
-  // TODO: Fix documentation - no nested returns, replace @return => @returns
-
   'use strict';
   // Base Plugin Object without prototype
   var Notes = Object.create(null);
@@ -30,16 +28,16 @@
     }
   });
 
-  /**
-   * Collection of Notes associated with a parent Model
-   * @param {array | Backbone.Model} models
-   * @param {object} options
-   * @param {Backbone.Model} options.parentModel
-   * @param {string} options.url
-   */
+  // Notes Store as Backbone Collection
   Notes.Collection = Backbone.Collection.extend({
     model: Notes.Model,
-    // called on initialization
+    /**
+     * Initialization of Collection of Notes associated with a parent Model
+     * @param {array | Backbone.Model} models
+     * @param {object} options
+     * @param {Backbone.Model} options.parentModel
+     * @param {string} options.url
+     */
     initialize: function (models, options) {
       this.parentModel = options.parentModel;
       this._url = options.url;
@@ -110,10 +108,10 @@
     },
     initialize: function (options) {
       var self = this;
-      self.options = options || {};
+      self.options = _.cloneDeep(options) || {};
       this.templates = options.templates;
 
-      // sets the self.options.save to have a always success property that
+      // Sets the self.options.save to have a always success property that
       //  will call the save.success if it was provided and
       //  options.destroy.wait is true by default
       self.options.save = _.defaults({
@@ -137,7 +135,7 @@
         wait: true
       });
 
-      // sets the self.options.destroy to have a always success property that
+      // Sets the self.options.destroy to have a always success property that
       //  will call the destroy.success if it was provided and
       //  options.destroy.wait is true by default
       self.options.destroy = _.defaults({
@@ -368,9 +366,6 @@
    *                                 (default: true)
    * @return {object} instance - returns an instance object with the collection
    *                             and views
-   * @return {Notes.Collection} instance.collection -  notes collection created
-   * @return {Notes.Views.List} instance.view.list - notes list view
-   * @return {Notes.Views.Create} instance.view.create - notes create view
    */
   Notes.init = function (options) {
     var opts = _.defaults(options, {

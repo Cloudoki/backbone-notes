@@ -15,49 +15,6 @@ Add notes to your Backbone Models and render them with Mustache Templates
 
 ## Usage
 
-### Templates
-
-You will need to provide 3 Mustache templates: one for viewing the notes, one for the editing of the notes and other for the creation. Before you are able to render the notes.
-
-```javascript
-  // Create the templates
-  var viewTemplates = {
-    view: '<div class="note-view">\
-            <div class="note-title"><strong>Note {{id}}</strong></div>\
-            <div class="note-body">\
-              <p class="note-data-text">{{text}}</p>\
-              <button class="note-action-edit">edit</button>\
-              <button class="note-action-destroy">destroy</button>\
-            </div>\
-          </div>',
-    edit: '<div class="note-edit">\
-            <div class="note-title"><strong>Note {{id}}</strong></div>\
-            <div class="note-body">\
-              <textarea class="note-data-text">{{text}}</textarea>\
-              <button class="note-action-save">save</button>\
-              <button class="note-action-cancel">cancel</button>\
-            </div>\
-          </div>'
-  };
-  var createTemplate = {
-    create: '<div class="note-create">\
-              <div class="note-body">\
-                <textarea class="note-data-text" placeholder="{{text}}"></textarea>\
-                <br/>\
-                <button class="note-action-create">Add</button>\
-              </div>\
-            </div>'
-  };
-```
-
-In order for the plugin to detect the clicking events and textarea fields you the following selectors are used, so the those classes are required:
-
- - `.note-data-text` the edit and view text content elements
- - `.note-action-create` create a new note
- - `.note-action-edit` change to edit mode
- - `.note-action-save` save the changes on edit mode (and go to view mode)
- - `.note-action-cancel` cancel the changes on edit mode (and go to view mode)
-
 ### Containers
 
 You will need to provide the elements for the list and creation views
@@ -97,10 +54,57 @@ You may use the `Notes.init` function for standart use of the plugin
     parentModel: user,
     listElement: $('#notes-list'),
     createElement: $('#notes-create'),
-    templates: viewTemplates,
-    createTemplate: createTemplate
+    templates: viewTemplates, // optional
+    createTemplate: createTemplate // optional
   })
 ```
+
+### Using other Templates
+
+The module uses 3 Mustache templates: one for viewing the notes, one for the
+editing of the notes and other for the creation. Before you are able to render
+the notes.
+
+```javascript
+  // Default templates
+  var viewTemplates = {
+    view: '<div class="note-view">' +
+            '<div class="note-title"><strong>Note {{id}}</strong></div>' +
+            '<div class="note-body">' +
+              '<p class="note-data-text">{{text}}</p>' +
+              '<button class="note-action-edit">edit</button>' +
+              '<button class="note-action-destroy">destroy</button>' +
+            '</div>' +
+          '</div>',
+    edit: '<div class="note-edit">' +
+            '<div class="note-title"><strong>Note {{id}}</strong></div>' +
+            '<div class="note-body">' +
+              '<textarea class="note-data-text">{{text}}</textarea>' +
+              '<button class="note-action-save">save</button>' +
+              '<button class="note-action-cancel">cancel</button>' +
+            '</div>' +
+          '</div>'
+  };
+  var createTemplate = {
+    create: '<div class="note-create">' +
+              '<div class="note-body">' +
+                '<textarea class="note-data-text" placeholder="{{text}}"></textarea>' +
+                '<br/>' +
+                '<button class="note-action-create">Add</button>' +
+              '</div>' +
+            '</div>'
+  };
+```
+
+In order for the plugin to detect the clicking events and textarea fields
+ the following selectors are used, so the those classes are required:
+
+ - `.note-data-text` the edit and view text content elements
+ - `.note-action-create` create a new note
+ - `.note-action-edit` change to edit mode
+ - `.note-action-save` save the changes on edit mode (and go to view mode)
+ - `.note-action-cancel` cancel the changes on edit mode (and go to view mode)
+
 
 ### Listening to the Notes List View events:
 
