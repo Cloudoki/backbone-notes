@@ -108,7 +108,7 @@
     },
     initialize: function (options) {
       var self = this;
-      self.options = _.cloneDeep(options) || {};
+      self.options = _.clone(options, true) || {};
       this.templates = options.templates;
 
       // Sets the self.options.save to have a always success property that
@@ -298,9 +298,7 @@
     initialize: function (options) {
       var self = this;
       this.options = options || {};
-      this.template = options.template || {
-        create: Notes.Templates.create
-      };
+      this.template = options.template || Notes.Templates.create
       this.options.data = _.defaults(options.data || {}, {
         text: 'insert note text here'
       });
@@ -343,7 +341,7 @@
      * @borrows Notes.Templates.create
      */
     render: function (template) {
-      this.$el.html(Mustache.render(template || this.template.create,
+      this.$el.html(Mustache.render(template || this.template,
         this.options.data));
     }
   });
@@ -394,7 +392,7 @@
       instance.view.create = new Notes.Views.Create({
         el: opts.createElement,
         viewList: instance.view.list,
-        template: opts.createTemplate
+        template: opts.templates ? opts.templates.create : undefined
       });
     }
 
