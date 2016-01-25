@@ -60,8 +60,7 @@ You may use the `Notes.init` function for standart use of the plugin
     parentModel: user,
     listElement: $('#notes-list'),
     createElement: $('#notes-create'),
-    templates: viewTemplates, // optional
-    createTemplate: createTemplate // optional
+    templates: templates // optional
   })
 ```
 
@@ -89,9 +88,7 @@ the notes.
               '<button class="note-action-save">save</button>' +
               '<button class="note-action-cancel">cancel</button>' +
             '</div>' +
-          '</div>'
-  };
-  var createTemplate = {
+          '</div>',
     create: '<div class="note-create">' +
               '<div class="note-body">' +
                 '<textarea class="note-data-text" placeholder="{{text}}"></textarea>' +
